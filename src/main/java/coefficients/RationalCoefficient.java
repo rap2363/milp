@@ -74,6 +74,75 @@ public final class RationalCoefficient implements Coefficient {
     }
 
     @Override
+    public Coefficient multiply(final Coefficient other) {
+        if (other instanceof IntegerCoefficient) {
+            return Coefficients.fromNumeratorAndDenominator(
+                getNumeratorValue() * ((IntegerCoefficient) other).getValue(),
+                getDenominatorValue()
+            );
+        } else if (other instanceof DoubleCoefficient) {
+            return new DoubleCoefficient(
+                getNumeratorValue() * ((DoubleCoefficient) other).getValue() / getDenominatorValue()
+            );
+        } else if (other instanceof RationalCoefficient) {
+            final RationalCoefficient otherAsRational = (RationalCoefficient) other;
+
+            return Coefficients.fromNumeratorAndDenominator(
+                getNumeratorValue() * otherAsRational.getNumeratorValue(),
+                getDenominatorValue() * otherAsRational.getDenominatorValue()
+            );
+        }
+
+        throw new IllegalArgumentException("Invalid input coefficients");
+    }
+
+    @Override
+    public Coefficient plus(final Coefficient other) {
+        if (other instanceof IntegerCoefficient) {
+            return Coefficients.fromNumeratorAndDenominator(
+                (((IntegerCoefficient) other).getValue() * getDenominatorValue()) + getNumeratorValue(),
+                getDenominatorValue()
+            );
+        } else if (other instanceof DoubleCoefficient) {
+            return new DoubleCoefficient(
+                (((double) getNumeratorValue()) / getDenominatorValue())
+                    + ((DoubleCoefficient) other).getValue() / getDenominatorValue()
+            );
+        } else if (other instanceof RationalCoefficient) {
+            final RationalCoefficient otherAsRational = (RationalCoefficient) other;
+            final int a = getNumeratorValue();
+            final int b = getDenominatorValue();
+            final int c = otherAsRational.getNumeratorValue();
+            final int d = otherAsRational.getDenominatorValue();
+
+            return Coefficients.fromNumeratorAndDenominator(
+                a * d + b * c,
+                b * d
+            );
+        }
+
+        throw new IllegalArgumentException("Invalid input coefficients");
+    }
+
+    @Override
+    public int compareTo(final Coefficient other) {
+        final double valueToCompare = (double) getNumeratorValue() / getDenominatorValue();
+        if (other instanceof IntegerCoefficient) {
+            return Double.compare(valueToCompare, ((IntegerCoefficient) other).getValue());
+        } else if (other instanceof DoubleCoefficient) {
+            return Double.compare(valueToCompare, ((DoubleCoefficient) other).getValue());
+        } else if (other instanceof RationalCoefficient) {
+            final RationalCoefficient otherAsRational = (RationalCoefficient) other;
+            return Double.compare(
+                valueToCompare,
+                (double) otherAsRational.getNumeratorValue() / otherAsRational.getDenominatorValue()
+            );
+        }
+
+        throw new IllegalArgumentException("Invalid input coefficients");
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -81,6 +150,7 @@ public final class RationalCoefficient implements Coefficient {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         final RationalCoefficient that = (RationalCoefficient) o;
         return numeratorFactorization.equals(that.numeratorFactorization)
             && denominatorFactorization.equals(that.denominatorFactorization);
@@ -88,6 +158,6 @@ public final class RationalCoefficient implements Coefficient {
 
     @Override
     public String toString() {
-        return numeratorFactorization.toString() + "/" + denominatorFactorization;
+        return getNumeratorValue() + "/" + getDenominatorValue();
     }
 }
