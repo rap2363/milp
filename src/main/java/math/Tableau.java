@@ -30,18 +30,51 @@ public final class Tableau {
         return new Tableau(newVectors);
     }
 
+    public Tableau pivot() {
+        final int optimalPivotCol = findOptimalPivotCol();
+
+        if (optimalPivotCol == -1) {
+            return this;
+        }
+
+        return pivot(optimalPivotCol);
+    }
+
     public Tableau pivot(final int col) {
         return pivot(findOptimalPivotRow(col), col);
     }
 
     /**
-     * Returns the argmin b_i / a_ik, for i in rows, k == col.
+     * Return the "most negative" column, or if all values are non-negative return -1.
+     */
+    private int findOptimalPivotCol() {
+        final Vector objectiveRow = vectors[vectors.length - 1];
+        int optimalPivotCol = -1;
+        Coefficient mostNegativeCoefficient = Coefficients.from(0);
+
+        for (int col = 1; col < objectiveRow.length(); col++) {
+            final Coefficient coefficientToCompare = objectiveRow.get(col);
+            if (coefficientToCompare.compareTo(mostNegativeCoefficient) < 0) {
+                optimalPivotCol = col;
+                mostNegativeCoefficient = coefficientToCompare;
+            }
+        }
+
+        return optimalPivotCol;
+    }
+
+    /**
+     * Returns the argmin b_i / a_ik, for i in rows, k == col, and ignoring the final row.
      */
     public int findOptimalPivotRow(final int col) {
         int optimalRow = -1;
         Coefficient minimumRatio = Coefficients.from(Double.POSITIVE_INFINITY);
-        for (int row = 0; row < vectors.length; row++) {
+        for (int row = 0; row < vectors.length - 1; row++) {
             final Vector rowVector = vectors[row];
+            final Coefficient divisorCoefficient = rowVector.get(col);
+            if (!Coefficients.isPositive(divisorCoefficient)) {
+                continue;
+            }
             final Coefficient ratio = Coefficients.divide(rowVector.get(0), rowVector.get(col));
 
             if (ratio.compareTo(minimumRatio) < 0) {
@@ -51,6 +84,10 @@ public final class Tableau {
         }
 
         return optimalRow;
+    }
+
+    public Coefficient get(int row, int col) {
+        return vectors[row].get(col);
     }
 
     @Override

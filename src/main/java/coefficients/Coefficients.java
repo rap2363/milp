@@ -63,7 +63,28 @@ public final class Coefficients {
         return new RationalCoefficient(numerator, denominator);
     }
 
-    public static Coefficient negate(final Coefficient coefficient) {
-        return multiply(coefficient, NEGATIVE_ONE);
+    public static double asDouble(final Coefficient coefficient) {
+        if (coefficient instanceof IntegerCoefficient) {
+            return ((IntegerCoefficient) coefficient).getValue();
+        } else if (coefficient instanceof DoubleCoefficient) {
+            return ((DoubleCoefficient) coefficient).getValue();
+        } else if (coefficient instanceof RationalCoefficient) {
+            final RationalCoefficient rationalCoefficient = (RationalCoefficient) coefficient;
+            return (double) rationalCoefficient.getNumeratorValue() / rationalCoefficient.getDenominatorValue();
+        }
+
+        throw new IllegalArgumentException("Invalid Input Coefficient");
+    }
+
+    public static boolean isPositive(final Coefficient coefficient) {
+        if (coefficient instanceof IntegerCoefficient) {
+            return ((IntegerCoefficient) coefficient).getValue() > 0;
+        } else if (coefficient instanceof DoubleCoefficient) {
+            return ((DoubleCoefficient) coefficient).getValue() > 0d;
+        } else if (coefficient instanceof RationalCoefficient) {
+            return ((RationalCoefficient) coefficient).getNumeratorValue() > 0;
+        }
+
+        throw new IllegalArgumentException("Invalid Input Coefficient");
     }
 }

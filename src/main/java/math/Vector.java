@@ -2,7 +2,9 @@ package math;
 
 import coefficients.Coefficient;
 import coefficients.Coefficients;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public final class Vector {
     private final Coefficient[] coefficients;
@@ -60,5 +62,36 @@ public final class Vector {
 
         final Vector otherVector = (Vector) o;
         return Arrays.equals(coefficients, otherVector.coefficients);
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final List<Coefficient> coefficients;
+
+        public Builder() {
+            this.coefficients = new ArrayList<>();
+        }
+
+        public Builder addCoefficient(final int value) {
+            this.coefficients.add(Coefficients.from(value));
+            return this;
+        }
+
+        public Builder addCoefficient(final double value) {
+            this.coefficients.add(Coefficients.from(value));
+            return this;
+        }
+
+        public Builder addRationalCoefficient(final int numerator, final int denominator) {
+            this.coefficients.add(Coefficients.from(numerator, denominator));
+            return this;
+        }
+
+        public Vector build() {
+            return new Vector(coefficients.toArray(new Coefficient[0]));
+        }
     }
 }
