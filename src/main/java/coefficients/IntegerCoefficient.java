@@ -1,6 +1,6 @@
 package coefficients;
 
-public final class IntegerCoefficient implements Coefficient {
+public final class IntegerCoefficient implements ConstantCoefficient {
     private final int value;
 
     IntegerCoefficient(final int value) {
@@ -12,22 +12,22 @@ public final class IntegerCoefficient implements Coefficient {
     }
 
     @Override
-    public Coefficient inverse() {
+    public RationalCoefficient inverse() {
         return new RationalCoefficient(1, value);
     }
 
     @Override
-    public Coefficient floor() {
+    public IntegerCoefficient floor() {
         return this;
     }
 
     @Override
-    public Coefficient ceil() {
+    public IntegerCoefficient ceil() {
         return this;
     }
 
     @Override
-    public Coefficient multiply(final Coefficient other) {
+    public ConstantCoefficient multiply(final ConstantCoefficient other) {
         if (other instanceof IntegerCoefficient) {
             return new IntegerCoefficient(getValue() * ((IntegerCoefficient) other).getValue());
         } else if (other instanceof DoubleCoefficient) {
@@ -60,6 +60,11 @@ public final class IntegerCoefficient implements Coefficient {
     }
 
     @Override
+    public Coefficient negate() {
+        return new IntegerCoefficient(-this.value);
+    }
+
+    @Override
     public int compareTo(final Coefficient other) {
         if (other instanceof IntegerCoefficient) {
             return Integer.compare(getValue(), ((IntegerCoefficient) other).getValue());
@@ -71,6 +76,8 @@ public final class IntegerCoefficient implements Coefficient {
                 getValue(),
                 (double) otherAsRational.getNumeratorValue() / otherAsRational.getDenominatorValue()
             );
+        } else if (other instanceof LinearMCoefficient) {
+            return -other.compareTo(this);
         }
 
         throw new IllegalArgumentException("Invalid input coefficients");

@@ -9,7 +9,7 @@ import math.PrimeFactorization;
 /**
  * A coefficient represented by two integer values corresponding to the numerator and denominator.
  */
-public final class RationalCoefficient implements Coefficient {
+public final class RationalCoefficient implements ConstantCoefficient {
     private final PrimeFactorization numeratorFactorization;
     private final PrimeFactorization denominatorFactorization;
     private final boolean isNegative;
@@ -50,6 +50,14 @@ public final class RationalCoefficient implements Coefficient {
         this.denominatorFactorization = new PrimeFactorization(reducedDenominatorMap);
     }
 
+    private RationalCoefficient(final PrimeFactorization numeratorFactorization,
+                                final PrimeFactorization denominatorFactorization,
+                                final boolean isNegative) {
+        this.numeratorFactorization = numeratorFactorization;
+        this.denominatorFactorization = denominatorFactorization;
+        this.isNegative = isNegative;
+    }
+
     public int getNumeratorValue() {
         return numeratorFactorization.getValue() * (isNegative ? -1 : 1);
     }
@@ -59,22 +67,22 @@ public final class RationalCoefficient implements Coefficient {
     }
 
     @Override
-    public Coefficient inverse() {
+    public ConstantCoefficient inverse() {
         return new RationalCoefficient(denominatorFactorization.getValue(), numeratorFactorization.getValue());
     }
 
     @Override
-    public Coefficient floor() {
+    public ConstantCoefficient floor() {
         return new IntegerCoefficient(numeratorFactorization.getValue() / denominatorFactorization.getValue());
     }
 
     @Override
-    public Coefficient ceil() {
+    public ConstantCoefficient ceil() {
         return new IntegerCoefficient((numeratorFactorization.getValue() / denominatorFactorization.getValue()) + 1);
     }
 
     @Override
-    public Coefficient multiply(final Coefficient other) {
+    public ConstantCoefficient multiply(final ConstantCoefficient other) {
         if (other instanceof IntegerCoefficient) {
             return Coefficients.fromNumeratorAndDenominator(
                 getNumeratorValue() * ((IntegerCoefficient) other).getValue(),
@@ -125,6 +133,11 @@ public final class RationalCoefficient implements Coefficient {
     }
 
     @Override
+    public Coefficient negate() {
+        return new RationalCoefficient(this.numeratorFactorization, this.denominatorFactorization, !isNegative);
+    }
+
+    @Override
     public int compareTo(final Coefficient other) {
         final double valueToCompare = (double) getNumeratorValue() / getDenominatorValue();
         if (other instanceof IntegerCoefficient) {
@@ -137,6 +150,8 @@ public final class RationalCoefficient implements Coefficient {
                 valueToCompare,
                 (double) otherAsRational.getNumeratorValue() / otherAsRational.getDenominatorValue()
             );
+        } else if (other instanceof LinearMCoefficient) {
+            return -other.compareTo(this);
         }
 
         throw new IllegalArgumentException("Invalid input coefficients");
