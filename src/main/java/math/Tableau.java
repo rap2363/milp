@@ -2,6 +2,7 @@ package math;
 
 import coefficients.Coefficient;
 import coefficients.Coefficients;
+
 import java.util.Arrays;
 
 public final class Tableau {
@@ -16,7 +17,9 @@ public final class Tableau {
      */
     public Tableau pivot(final int row, final int col) {
         final Vector[] newVectors = new Vector[vectors.length];
-        final Coefficient inversePivotCoefficient = vectors[row].get(col).inverse();
+        final Coefficient inversePivotCoefficient = Coefficients.invert(
+                vectors[row].get(col)
+        );
         final Vector inverseScaledVector = vectors[row].scale(inversePivotCoefficient);
         for (int i = 0; i < vectors.length; i++) {
             if (i == row) {
@@ -54,7 +57,7 @@ public final class Tableau {
 
         for (int col = 1; col < objectiveRow.length(); col++) {
             final Coefficient coefficientToCompare = objectiveRow.get(col);
-            if (coefficientToCompare.compareTo(mostNegativeCoefficient) < 0) {
+            if (Coefficients.compare(coefficientToCompare, mostNegativeCoefficient) < 0) {
                 optimalPivotCol = col;
                 mostNegativeCoefficient = coefficientToCompare;
             }
@@ -75,9 +78,13 @@ public final class Tableau {
             if (!Coefficients.isPositive(divisorCoefficient)) {
                 continue;
             }
-            final Coefficient ratio = Coefficients.divide(rowVector.get(0), rowVector.get(col));
 
-            if (ratio.compareTo(minimumRatio) < 0) {
+            final Coefficient ratio = Coefficients.divide(
+                    rowVector.get(0),
+                    rowVector.get(col)
+            );
+
+            if (Coefficients.compare(ratio, minimumRatio) < 0) {
                 minimumRatio = ratio;
                 optimalRow = row;
             }
@@ -86,7 +93,7 @@ public final class Tableau {
         return optimalRow;
     }
 
-    public Coefficient get(int row, int col) {
+    public Coefficient get(final int row, final int col) {
         return vectors[row].get(col);
     }
 

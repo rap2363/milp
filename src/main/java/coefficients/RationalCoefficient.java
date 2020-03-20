@@ -1,10 +1,11 @@
 package coefficients;
 
+import math.PrimeFactorization;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import math.PrimeFactorization;
 
 /**
  * A coefficient represented by two integer values corresponding to the numerator and denominator.
@@ -67,11 +68,6 @@ public final class RationalCoefficient implements ConstantCoefficient {
     }
 
     @Override
-    public ConstantCoefficient inverse() {
-        return new RationalCoefficient(denominatorFactorization.getValue(), numeratorFactorization.getValue());
-    }
-
-    @Override
     public ConstantCoefficient floor() {
         return new IntegerCoefficient(numeratorFactorization.getValue() / denominatorFactorization.getValue());
     }
@@ -82,79 +78,16 @@ public final class RationalCoefficient implements ConstantCoefficient {
     }
 
     @Override
-    public ConstantCoefficient multiply(final ConstantCoefficient other) {
-        if (other instanceof IntegerCoefficient) {
-            return Coefficients.fromNumeratorAndDenominator(
-                getNumeratorValue() * ((IntegerCoefficient) other).getValue(),
-                getDenominatorValue()
-            );
-        } else if (other instanceof DoubleCoefficient) {
-            return new DoubleCoefficient(
-                getNumeratorValue() * ((DoubleCoefficient) other).getValue() / getDenominatorValue()
-            );
-        } else if (other instanceof RationalCoefficient) {
-            final RationalCoefficient otherAsRational = (RationalCoefficient) other;
-
-            return Coefficients.fromNumeratorAndDenominator(
-                getNumeratorValue() * otherAsRational.getNumeratorValue(),
-                getDenominatorValue() * otherAsRational.getDenominatorValue()
-            );
-        }
-
-        throw new IllegalArgumentException("Invalid input coefficients");
-    }
-
-    @Override
-    public Coefficient plus(final Coefficient other) {
-        if (other instanceof IntegerCoefficient) {
-            return Coefficients.fromNumeratorAndDenominator(
-                (((IntegerCoefficient) other).getValue() * getDenominatorValue()) + getNumeratorValue(),
-                getDenominatorValue()
-            );
-        } else if (other instanceof DoubleCoefficient) {
-            return new DoubleCoefficient(
-                (((double) getNumeratorValue()) / getDenominatorValue())
-                    + ((DoubleCoefficient) other).getValue() / getDenominatorValue()
-            );
-        } else if (other instanceof RationalCoefficient) {
-            final RationalCoefficient otherAsRational = (RationalCoefficient) other;
-            final int a = getNumeratorValue();
-            final int b = getDenominatorValue();
-            final int c = otherAsRational.getNumeratorValue();
-            final int d = otherAsRational.getDenominatorValue();
-
-            return Coefficients.fromNumeratorAndDenominator(
-                a * d + b * c,
-                b * d
-            );
-        }
-
-        throw new IllegalArgumentException("Invalid input coefficients");
-    }
-
-    @Override
-    public Coefficient negate() {
+    public RationalCoefficient negate() {
         return new RationalCoefficient(this.numeratorFactorization, this.denominatorFactorization, !isNegative);
     }
 
     @Override
-    public int compareTo(final Coefficient other) {
-        final double valueToCompare = (double) getNumeratorValue() / getDenominatorValue();
-        if (other instanceof IntegerCoefficient) {
-            return Double.compare(valueToCompare, ((IntegerCoefficient) other).getValue());
-        } else if (other instanceof DoubleCoefficient) {
-            return Double.compare(valueToCompare, ((DoubleCoefficient) other).getValue());
-        } else if (other instanceof RationalCoefficient) {
-            final RationalCoefficient otherAsRational = (RationalCoefficient) other;
-            return Double.compare(
-                valueToCompare,
-                (double) otherAsRational.getNumeratorValue() / otherAsRational.getDenominatorValue()
-            );
-        } else if (other instanceof LinearMCoefficient) {
-            return -other.compareTo(this);
-        }
-
-        throw new IllegalArgumentException("Invalid input coefficients");
+    public Coefficient inverse() {
+        return Coefficients.fromNumeratorAndDenominator(
+                this.getDenominatorValue(),
+                this.getNumeratorValue()
+        );
     }
 
     @Override
@@ -168,7 +101,7 @@ public final class RationalCoefficient implements ConstantCoefficient {
 
         final RationalCoefficient that = (RationalCoefficient) o;
         return numeratorFactorization.equals(that.numeratorFactorization)
-            && denominatorFactorization.equals(that.denominatorFactorization);
+                && denominatorFactorization.equals(that.denominatorFactorization);
     }
 
     @Override
