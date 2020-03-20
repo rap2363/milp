@@ -2,6 +2,7 @@ package math;
 
 import coefficients.Coefficient;
 import coefficients.Coefficients;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +18,7 @@ public final class Vector {
         return coefficients.length;
     }
 
-    public Vector add(Vector other) {
+    public Vector add(final Vector other) {
         if (coefficients.length != other.length()) {
             throw new IllegalArgumentException("Vectors must be same length");
         }
@@ -30,14 +31,14 @@ public final class Vector {
         return new Vector(newCoefficients);
     }
 
-    public Vector subtract(Vector other) {
+    public Vector subtract(final Vector other) {
         return add(other.scale(Coefficients.negativeOne()));
     }
 
-    public Vector scale(Coefficient value) {
+    public Vector scale(final Coefficient value) {
         final Coefficient[] newCoefficients = new Coefficient[length()];
         for (int i = 0; i < length(); i++) {
-            newCoefficients[i] = Coefficients.multiply(coefficients[i], value);
+            newCoefficients[i] = Coefficients.scaleBy(coefficients[i], value);
         }
 
         return new Vector(newCoefficients);
