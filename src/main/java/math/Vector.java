@@ -45,11 +45,24 @@ public final class Vector {
         return new Vector(newCoefficients);
     }
 
-    public double dotProduct(final Vector other) {
+    public Coefficient dotProduct(final Vector other) {
         return Vector.dotProduct(this, other);
     }
 
-    public static double dotProduct(final Vector first, final Vector second) {
+    public static Coefficient dotProduct(final Vector first, final Vector second) {
+        Preconditions.checkArgument(first.length() == second.length());
+        Coefficient value = Coefficients.ZERO;
+        for (int i = 0; i < first.length(); i++) {
+            value = Coefficients.add(value, Coefficients.scaleBy(first.get(i), second.get(i)));
+        }
+        return value;
+    }
+
+    public double dotProductAsDouble(final Vector other) {
+        return Vector.dotProductAsDouble(this, other);
+    }
+
+    public static double dotProductAsDouble(final Vector first, final Vector second) {
         Preconditions.checkArgument(first.length() == second.length());
         double value = 0d;
         for (int i = 0; i < first.length(); i++) {

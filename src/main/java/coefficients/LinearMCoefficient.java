@@ -23,6 +23,10 @@ public final class LinearMCoefficient implements Coefficient {
         this.interceptValue = interceptValue;
     }
 
+    public static LinearMCoefficient fromSlopeValue(final int slopeValue) {
+        return new LinearMCoefficient(new IntegerCoefficient(slopeValue), Coefficients.ZERO);
+    }
+
     @Override
     public LinearMCoefficient negate() {
         return new LinearMCoefficient(slopeValue.negate(), interceptValue.negate());

@@ -11,7 +11,6 @@ public final class Tableau {
 
     public Tableau(final Vector... vectors) {
         this(vectors[0].length() - 1, vectors);
-
     }
 
     public Tableau(final int numVariables,
