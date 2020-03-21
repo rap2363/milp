@@ -2,6 +2,7 @@ package math;
 
 import coefficients.Coefficient;
 import coefficients.Coefficients;
+import lang.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +45,19 @@ public final class Vector {
         return new Vector(newCoefficients);
     }
 
+    public double dotProduct(final Vector other) {
+        return Vector.dotProduct(this, other);
+    }
+
+    public static double dotProduct(final Vector first, final Vector second) {
+        Preconditions.checkArgument(first.length() == second.length());
+        double value = 0d;
+        for (int i = 0; i < first.length(); i++) {
+            value += Coefficients.asDouble(Coefficients.scaleBy(first.get(i), second.get(i)));
+        }
+        return value;
+    }
+
     public Coefficient get(final int index) {
         return coefficients[index];
     }
@@ -65,6 +79,20 @@ public final class Vector {
         return Arrays.equals(coefficients, otherVector.coefficients);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < coefficients.length; i++) {
+            final Coefficient coefficient = coefficients[i];
+            stringBuilder.append(coefficient.toString());
+            if (i < coefficients.length - 1) {
+                stringBuilder.append(",");
+            }
+        }
+
+        return String.format("[%s]", stringBuilder.toString());
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -77,17 +105,33 @@ public final class Vector {
         }
 
         public Builder addCoefficient(final int value) {
-            this.coefficients.add(Coefficients.from(value));
-            return this;
+            return addCoefficient(Coefficients.from(value));
         }
 
         public Builder addCoefficient(final double value) {
-            this.coefficients.add(Coefficients.from(value));
-            return this;
+            return addCoefficient(Coefficients.from(value));
         }
 
         public Builder addRationalCoefficient(final int numerator, final int denominator) {
-            this.coefficients.add(Coefficients.from(numerator, denominator));
+            return addCoefficient(Coefficients.from(numerator, denominator));
+        }
+
+        public Builder addCoefficient(final Coefficient coefficient) {
+            this.coefficients.add(coefficient);
+            return this;
+        }
+
+        public Builder addAllCoefficients(final Coefficient... coefficients) {
+            for (final Coefficient coefficient : coefficients) {
+                addCoefficient(coefficient);
+            }
+            return this;
+        }
+
+        public Builder addFromVector(final Vector vector) {
+            for (final Coefficient coefficient : vector.getValues()) {
+                addCoefficient(coefficient);
+            }
             return this;
         }
 

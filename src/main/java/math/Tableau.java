@@ -7,9 +7,25 @@ import java.util.Arrays;
 
 public final class Tableau {
     private final Vector[] vectors;
+    private final int numVariables;
 
     public Tableau(final Vector... vectors) {
+        this(vectors[0].length() - 1, vectors);
+
+    }
+
+    public Tableau(final int numVariables,
+                   final Vector... vectors) {
         this.vectors = vectors;
+        this.numVariables = numVariables;
+    }
+
+    public int getWidth() {
+        return numVariables;
+    }
+
+    public int getHeight() {
+        return vectors.length;
     }
 
     /**
@@ -30,7 +46,7 @@ public final class Tableau {
             }
         }
 
-        return new Tableau(newVectors);
+        return new Tableau(numVariables, newVectors);
     }
 
     public Tableau pivot() {
@@ -50,15 +66,21 @@ public final class Tableau {
     /**
      * Return the "most negative" column, or if all values are non-negative return -1.
      */
-    private int findOptimalPivotCol() {
-        final Vector objectiveRow = vectors[vectors.length - 1];
+    public int findOptimalPivotCol() {
+        return findOptimalPivotCol(vectors[vectors.length - 1]);
+    }
+
+    /**
+     * Return the "most negative" column, or if all values are non-negative return -1.
+     */
+    public int findOptimalPivotCol(final Vector objectiveRow) {
         int optimalPivotCol = -1;
         Coefficient mostNegativeCoefficient = Coefficients.from(0);
 
-        for (int col = 1; col < objectiveRow.length(); col++) {
+        for (int col = 0; col < numVariables; col++) {
             final Coefficient coefficientToCompare = objectiveRow.get(col);
             if (Coefficients.compare(coefficientToCompare, mostNegativeCoefficient) < 0) {
-                optimalPivotCol = col;
+                optimalPivotCol = col + 1; // The first value is the value of the basis variable
                 mostNegativeCoefficient = coefficientToCompare;
             }
         }
@@ -72,7 +94,7 @@ public final class Tableau {
     public int findOptimalPivotRow(final int col) {
         int optimalRow = -1;
         Coefficient minimumRatio = Coefficients.from(Double.POSITIVE_INFINITY);
-        for (int row = 0; row < vectors.length - 1; row++) {
+        for (int row = 0; row < vectors.length; row++) {
             final Vector rowVector = vectors[row];
             final Coefficient divisorCoefficient = rowVector.get(col);
             if (!Coefficients.isPositive(divisorCoefficient)) {
@@ -81,7 +103,7 @@ public final class Tableau {
 
             final Coefficient ratio = Coefficients.divide(
                     rowVector.get(0),
-                    rowVector.get(col)
+                    divisorCoefficient
             );
 
             if (Coefficients.compare(ratio, minimumRatio) < 0) {

@@ -89,18 +89,40 @@ public final class Coefficients {
             return ((DoubleCoefficient) coefficient).getValue() > 0d;
         } else if (coefficient instanceof RationalCoefficient) {
             return ((RationalCoefficient) coefficient).getNumeratorValue() > 0;
+        } else if (coefficient instanceof LinearMCoefficient) {
+            return Coefficients.isPositive(((LinearMCoefficient) coefficient).getSlopeValue());
         }
 
         throw new IllegalArgumentException("Invalid Input Coefficient");
     }
 
-    public static boolean isZero(final ConstantCoefficient coefficient) {
+    public static boolean isZero(final Coefficient coefficient) {
         if (coefficient instanceof IntegerCoefficient) {
             return ((IntegerCoefficient) coefficient).getValue() == 0;
         } else if (coefficient instanceof DoubleCoefficient) {
             return ((DoubleCoefficient) coefficient).getValue() == 0d;
         } else if (coefficient instanceof RationalCoefficient) {
             return ((RationalCoefficient) coefficient).getNumeratorValue() == 0;
+        } else if (coefficient instanceof LinearMCoefficient) {
+            return Coefficients.isZero(((LinearMCoefficient) coefficient).getInterceptValue());
+        }
+
+        throw new IllegalArgumentException("Invalid Input Coefficient");
+    }
+
+    public static boolean isNonNegative(final Coefficient coefficient) {
+        return !Coefficients.isNegative(coefficient);
+    }
+
+    public static boolean isNegative(final Coefficient coefficient) {
+        if (coefficient instanceof IntegerCoefficient) {
+            return ((IntegerCoefficient) coefficient).getValue() < 0;
+        } else if (coefficient instanceof DoubleCoefficient) {
+            return ((DoubleCoefficient) coefficient).getValue() < 0d;
+        } else if (coefficient instanceof RationalCoefficient) {
+            return ((RationalCoefficient) coefficient).getNumeratorValue() < 0;
+        } else if (coefficient instanceof LinearMCoefficient) {
+            return Coefficients.isNegative(((LinearMCoefficient) coefficient).getSlopeValue());
         }
 
         throw new IllegalArgumentException("Invalid Input Coefficient");
@@ -130,7 +152,7 @@ public final class Coefficients {
         if (firstPriority <= secondPriority) {
             return compare(firstCoefficient, firstClazz, secondCoefficient, secondClazz);
         } else {
-            return compare(secondCoefficient, secondClazz, firstCoefficient, firstClazz);
+            return -compare(secondCoefficient, secondClazz, firstCoefficient, firstClazz);
         }
     }
 
