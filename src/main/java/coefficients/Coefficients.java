@@ -83,27 +83,31 @@ public final class Coefficients {
     }
 
     public static boolean isPositive(final Coefficient coefficient) {
-        if (coefficient instanceof IntegerCoefficient) {
-            return ((IntegerCoefficient) coefficient).getValue() > 0;
-        } else if (coefficient instanceof DoubleCoefficient) {
-            return ((DoubleCoefficient) coefficient).getValue() > 0d;
-        } else if (coefficient instanceof RationalCoefficient) {
-            return ((RationalCoefficient) coefficient).getNumeratorValue() > 0;
-        }
-
-        throw new IllegalArgumentException("Invalid Input Coefficient");
+        return Coefficients.greaterThan(coefficient, Coefficients.ZERO);
     }
 
-    public static boolean isZero(final ConstantCoefficient coefficient) {
-        if (coefficient instanceof IntegerCoefficient) {
-            return ((IntegerCoefficient) coefficient).getValue() == 0;
-        } else if (coefficient instanceof DoubleCoefficient) {
-            return ((DoubleCoefficient) coefficient).getValue() == 0d;
-        } else if (coefficient instanceof RationalCoefficient) {
-            return ((RationalCoefficient) coefficient).getNumeratorValue() == 0;
-        }
+    public static boolean isZero(final Coefficient coefficient) {
+        return Coefficients.equalTo(coefficient, Coefficients.ZERO);
+    }
 
-        throw new IllegalArgumentException("Invalid Input Coefficient");
+    public static boolean isNonNegative(final Coefficient coefficient) {
+        return !Coefficients.isNegative(coefficient);
+    }
+
+    public static boolean isNegative(final Coefficient coefficient) {
+        return Coefficients.lessThan(coefficient, Coefficients.ZERO);
+    }
+
+    public static boolean greaterThan(final Coefficient firstCoefficient, final Coefficient secondCoefficient) {
+        return compare(firstCoefficient, secondCoefficient) > 0;
+    }
+
+    public static boolean equalTo(final Coefficient firstCoefficient, final Coefficient secondCoefficient) {
+        return compare(firstCoefficient, secondCoefficient) == 0;
+    }
+
+    public static boolean lessThan(final Coefficient firstCoefficient, final Coefficient secondCoefficient) {
+        return compare(firstCoefficient, secondCoefficient) < 0;
     }
 
     /*******************************************************************************************************************
@@ -130,7 +134,7 @@ public final class Coefficients {
         if (firstPriority <= secondPriority) {
             return compare(firstCoefficient, firstClazz, secondCoefficient, secondClazz);
         } else {
-            return compare(secondCoefficient, secondClazz, firstCoefficient, firstClazz);
+            return -compare(secondCoefficient, secondClazz, firstCoefficient, firstClazz);
         }
     }
 
@@ -572,6 +576,10 @@ public final class Coefficients {
 
     private static Coefficient scaleLinearMByInteger(final LinearMCoefficient firstCoefficient,
                                                      final IntegerCoefficient secondCoefficient) {
+        if (Coefficients.isZero(secondCoefficient)) {
+            return Coefficients.ZERO;
+        }
+
         return new LinearMCoefficient(
                 (ConstantCoefficient) Coefficients.scaleBy(firstCoefficient.getSlopeValue(), secondCoefficient),
                 (ConstantCoefficient) Coefficients.scaleBy(firstCoefficient.getInterceptValue(), secondCoefficient)
