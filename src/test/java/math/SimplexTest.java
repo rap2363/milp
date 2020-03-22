@@ -1,6 +1,7 @@
 package math;
 
 import coefficients.Coefficients;
+import core.Simplex;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

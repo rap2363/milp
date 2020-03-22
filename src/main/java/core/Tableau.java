@@ -1,7 +1,8 @@
-package math;
+package core;
 
 import coefficients.Coefficient;
 import coefficients.Coefficients;
+import math.Vector;
 
 import java.util.Arrays;
 

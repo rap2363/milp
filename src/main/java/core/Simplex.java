@@ -1,10 +1,11 @@
-package math;
+package core;
 
 import coefficients.Coefficient;
 import coefficients.Coefficients;
 import coefficients.ConstantCoefficient;
 import coefficients.LinearMCoefficient;
 import lang.Preconditions;
+import math.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package math;
+package core;
 
 public final class Tableaus {
     private Tableaus() {
