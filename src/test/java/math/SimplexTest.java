@@ -32,7 +32,7 @@ public class SimplexTest {
                                         .build(),
                                 Coefficients.from(24))
                         .build()
-                        .getSolution()
+                        .getOptimalSolution()
                         .toString()
         );
 
@@ -64,7 +64,7 @@ public class SimplexTest {
                                         .build(),
                                 Coefficients.from(4))
                         .build()
-                        .getSolution()
+                        .getOptimalSolution()
                         .toString());
 
         assertEquals(
@@ -94,7 +94,7 @@ public class SimplexTest {
                                         .build(),
                                 Coefficients.from(8))
                         .build()
-                        .getSolution()
+                        .getOptimalSolution()
                         .toString());
     }
 
@@ -113,7 +113,7 @@ public class SimplexTest {
                                         .build(),
                                 Coefficients.from(10))
                         .build()
-                        .getSolution()
+                        .getOptimalSolution()
                         .toString()
         );
     }
@@ -138,7 +138,7 @@ public class SimplexTest {
                                         .build(),
                                 Coefficients.from(0))
                         .build()
-                        .getSolution()
+                        .getOptimalSolution()
                         .toString()
         );
 
@@ -165,7 +165,7 @@ public class SimplexTest {
                                         .build(),
                                 Coefficients.from(5))
                         .build()
-                        .getSolution()
+                        .getOptimalSolution()
                         .toString()
         );
 
@@ -197,7 +197,87 @@ public class SimplexTest {
                                         .build(),
                                 Coefficients.from(6))
                         .build()
-                        .getSolution()
+                        .getOptimalSolution()
+                        .toString()
+        );
+    }
+
+    @Test
+    public void testMinimizationWithGreaterThanInequality() {
+        assertEquals(
+                "[0,1]",
+                Simplex.newBuilder()
+                        .withCostVector(Vector.newBuilder()
+                                .addCoefficient(-2)
+                                .addCoefficient(-1)
+                                .build())
+                        .addGreaterThanInequality(Vector.newBuilder()
+                                        .addCoefficient(1)
+                                        .addCoefficient(1)
+                                        .build(),
+                                Coefficients.from(1))
+                        .build()
+                        .getOptimalSolution()
+                        .toString()
+        );
+    }
+
+
+    @Test
+    public void testMaximizationWithLessThanAndGreaterThanInequality() {
+        assertEquals(
+                "[2,0]",
+                Simplex.newBuilder()
+                        .withCostVector(Vector.newBuilder()
+                                .addCoefficient(2)
+                                .addCoefficient(1)
+                                .build())
+                        .addGreaterThanInequality(Vector.newBuilder()
+                                        .addCoefficient(1)
+                                        .addCoefficient(1)
+                                        .build(),
+                                Coefficients.from(1))
+                        .addLessThanInequality(Vector.newBuilder()
+                                        .addCoefficient(1)
+                                        .addCoefficient(1)
+                                        .build(),
+                                Coefficients.from(2))
+                        .build()
+                        .getOptimalSolution()
+                        .toString()
+        );
+    }
+
+    @Test
+    public void testMaximizationWithAllThreeTypesOfInequalities() {
+        assertEquals(
+                "[2,0,2]",
+                Simplex.newBuilder()
+                        .withCostVector(Vector.newBuilder()
+                                .addCoefficient(2)
+                                .addCoefficient(-1)
+                                .addCoefficient(3)
+                                .build())
+                        .addEquality(Vector.newBuilder()
+                                        .addCoefficient(1)
+                                        .addCoefficient(1)
+                                        .addCoefficient(1)
+                                        .build(),
+                                Coefficients.from(4))
+                        .addGreaterThanInequality(Vector.newBuilder()
+                                        .addCoefficient(1)
+                                        .addCoefficient(-2)
+                                        .addCoefficient(1)
+                                        .build(),
+                                Coefficients.from(3))
+                        .addLessThanInequality(Vector.newBuilder()
+                                        .addCoefficient(0)
+                                        .addCoefficient(2)
+                                        .addCoefficient(1)
+                                        .build(),
+                                Coefficients.from(2))
+                        .build()
+                        .getOptimalSolution()
                         .toString()
         );
     }

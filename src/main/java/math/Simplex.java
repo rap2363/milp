@@ -39,48 +39,64 @@ public final class Simplex {
     private final List<ConstantCoefficient> lessThanConstants;
     private final List<Vector> equalities;
     private final List<ConstantCoefficient> equalityConstants;
+    private final List<Vector> greaterThanInequalities;
+    private final List<ConstantCoefficient> greaterThanConstants;
     private final int numBasisVariables;
     private final int numSlackVariables;
     private final int numArtificialVariables;
     private final int[] basisVariables;
-    private final Vector solution;
+    private final SimplexResults simplexResults;
 
     private Simplex(final Vector costVector,
                     final List<Vector> lessThanInequalities,
                     final List<ConstantCoefficient> lessThanConstants,
                     final List<Vector> equalities,
-                    final List<ConstantCoefficient> equalityConstants) {
+                    final List<ConstantCoefficient> equalityConstants,
+                    final List<Vector> greaterThanInequalities,
+                    final List<ConstantCoefficient> greaterThanConstants) {
         this.costVector = costVector;
         this.lessThanInequalities = lessThanInequalities;
         this.lessThanConstants = lessThanConstants;
         this.equalities = equalities;
         this.equalityConstants = equalityConstants;
-        numSlackVariables = lessThanInequalities.size();
-        numArtificialVariables = equalities.size();
-        numBasisVariables = lessThanInequalities.size() + equalities.size();
+        this.greaterThanInequalities = greaterThanInequalities;
+        this.greaterThanConstants = greaterThanConstants;
+        numSlackVariables = lessThanInequalities.size() + greaterThanInequalities.size();
+        numArtificialVariables = equalities.size() + greaterThanInequalities.size();
+        numBasisVariables = lessThanInequalities.size() + equalities.size() + greaterThanInequalities.size();
         basisVariables = new int[numBasisVariables];
-        this.solution = calculateSolution();
+        this.simplexResults = calculateSolution();
     }
 
-    private Vector calculateSolution() {
-        for (int i = 0; i < numBasisVariables; i++) {
-            // Initialize with the slack and artificial variables
-            basisVariables[i] = i + costVector.length();
+    private SimplexResults calculateSolution() {
+        // Initialize the basis with the slack and artificial variables
+        final int slackVariableOffset = costVector.length();
+        for (int i = 0; i < lessThanInequalities.size(); i++) {
+            basisVariables[i] = slackVariableOffset + i;
+        }
+        final int equalityVariableOffset = slackVariableOffset + lessThanInequalities.size();
+        for (int i = 0; i < equalities.size(); i++) {
+            basisVariables[i + lessThanInequalities.size()] = equalityVariableOffset + i;
+        }
+        final int greaterThanVariableOffset
+                = equalityVariableOffset + equalities.size() + greaterThanInequalities.size();
+        for (int i = 0; i < greaterThanInequalities.size(); i++) {
+            basisVariables[i + lessThanInequalities.size() + equalities.size()] = greaterThanVariableOffset + i;
         }
 
         final List<Vector> tableauVectors = new ArrayList<>(numBasisVariables);
 
         // Add less than inequality variable rows
         for (int i = 0; i < lessThanConstants.size(); i++) {
-            final Vector.Builder slackVariableVectorBuilder = Vector.newBuilder();
+            final Vector.Builder lessThanInequalityVectorBuilder = Vector.newBuilder();
             for (int j = 0; j < numSlackVariables + numArtificialVariables; j++) {
-                slackVariableVectorBuilder.addCoefficient(i == j ? Coefficients.ONE : Coefficients.ZERO);
+                lessThanInequalityVectorBuilder.addCoefficient(i == j ? Coefficients.ONE : Coefficients.ZERO);
             }
 
             final Vector vectorToAdd = Vector.newBuilder()
                     .addCoefficient(lessThanConstants.get(i))
                     .addFromVector(lessThanInequalities.get(i))
-                    .addFromVector(slackVariableVectorBuilder.build())
+                    .addFromVector(lessThanInequalityVectorBuilder.build())
                     .build();
             tableauVectors.add(vectorToAdd);
         }
@@ -89,8 +105,8 @@ public final class Simplex {
         for (int i = 0; i < equalities.size(); i++) {
             final Vector.Builder equalityVectorBuilder = Vector.newBuilder();
             for (int j = 0; j < numSlackVariables + numArtificialVariables; j++) {
-                final int iOffset = i + numSlackVariables;
-                equalityVectorBuilder.addCoefficient(iOffset == j ? Coefficients.ONE : Coefficients.ZERO);
+                final int artficialOffset = i + numSlackVariables;
+                equalityVectorBuilder.addCoefficient(artficialOffset == j ? Coefficients.ONE : Coefficients.ZERO);
             }
 
             final Vector vectorToAdd = Vector.newBuilder()
@@ -101,12 +117,41 @@ public final class Simplex {
             tableauVectors.add(vectorToAdd);
         }
 
+        // Add the greater than inequality variable rows
+        for (int i = 0; i < greaterThanInequalities.size(); i++) {
+            final Vector.Builder greaterThanInequalityVectorBuilder = Vector.newBuilder();
+            for (int j = 0; j < numSlackVariables + numArtificialVariables; j++) {
+                final int lessThanOffset = i + lessThanInequalities.size();
+                final int artficialOffset = i + numSlackVariables;
+                // Subtract slack variables
+                if (j == i + lessThanOffset) {
+                    greaterThanInequalityVectorBuilder.addCoefficient(Coefficients.NEGATIVE_ONE);
+                } else if (j == i + artficialOffset) {
+                    greaterThanInequalityVectorBuilder.addCoefficient(Coefficients.ONE);
+                } else {
+                    greaterThanInequalityVectorBuilder.addCoefficient(Coefficients.ZERO);
+                }
+            }
+
+            final Vector vectorToAdd = Vector.newBuilder()
+                    .addCoefficient(greaterThanConstants.get(i))
+                    .addFromVector(greaterThanInequalities.get(i))
+                    .addFromVector(greaterThanInequalityVectorBuilder.build())
+                    .build();
+            tableauVectors.add(vectorToAdd);
+        }
+
         Tableau tableau = new Tableau(
                 costVector.length() + numSlackVariables + numArtificialVariables,
                 tableauVectors.toArray(new Vector[0])
         );
 
+        boolean isBounded = true;
+        final List<Vector> simplexSolutions = new ArrayList<>();
         while (true) {
+            final Vector currentSolution = createSolutionFromBasis(tableau, costVector.length(), basisVariables);
+            simplexSolutions.add(currentSolution);
+
             final Vector objectiveVector = getObjectiveVector(tableau);
             final int pivotCol = tableau.findOptimalPivotCol(objectiveVector);
             if (pivotCol == -1) {
@@ -118,6 +163,7 @@ public final class Simplex {
 
             if (pivotRow == -1) {
                 // Problem is unbounded above
+                isBounded = false;
                 break;
             }
 
@@ -128,7 +174,23 @@ public final class Simplex {
         }
 
         // Assemble a solution using the basis variables
-        final Coefficient[] solutionCoefficients = new Coefficient[costVector.length()];
+        final Vector solutionVector = createSolutionFromBasis(tableau, costVector.length(), basisVariables);
+
+        final boolean isFeasible = isFeasibleSolution(solutionVector);
+        final double optimalValue;
+        if (isFeasible && isBounded) {
+            optimalValue = solutionVector.dotProductAsDouble(costVector);
+        } else {
+            optimalValue = isFeasible ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+        }
+
+        return new SimplexResults(simplexSolutions, isFeasible, isBounded);
+    }
+
+    private static Vector createSolutionFromBasis(final Tableau tableau,
+                                                  final int numRealVariables,
+                                                  final int[] basisVariables) {
+        final Coefficient[] solutionCoefficients = new Coefficient[numRealVariables];
         Arrays.fill(solutionCoefficients, Coefficients.ZERO);
         for (int rowIndex = 0; rowIndex < basisVariables.length; rowIndex++) {
             final int basisIndex = basisVariables[rowIndex];
@@ -137,15 +199,7 @@ public final class Simplex {
             }
         }
 
-        final Vector solutionVector = Vector.newBuilder()
-                .addAllCoefficients(solutionCoefficients)
-                .build();
-        System.out.println("Optimal Solution: " + solutionVector);
-        System.out.println("Optimal Value: " + solutionVector.dotProductAsDouble(costVector));
-        System.out.println(String.format(
-                "Solution is %s",
-                isFeasibleSolution(solutionVector) ? "feasible" : "infeasible"));
-        return solutionVector;
+        return Vector.newBuilder().addAllCoefficients(solutionCoefficients).build();
     }
 
     public Vector getObjectiveVector(final Tableau tableau) {
@@ -198,11 +252,55 @@ public final class Simplex {
             }
         }
 
+        for (int i = 0; i < greaterThanInequalities.size(); i++) {
+            final Coefficient cost = Vector.dotProduct(greaterThanInequalities.get(i), solution);
+            if (Coefficients.lessThan(cost, greaterThanConstants.get(i))) {
+                return false;
+            }
+        }
+
         return true;
     }
 
-    public Vector getSolution() {
-        return solution;
+    public Vector getOptimalSolution() {
+        return simplexResults.optimalSolution;
+    }
+
+    public List<Vector> getSolutionTrace() {
+        return simplexResults.solutionTrace;
+    }
+
+    public double getOptimalValue() {
+        return simplexResults.optimalValue;
+    }
+
+    public boolean isFeasible() {
+        return simplexResults.isFeasible;
+    }
+
+    public boolean isBounded() {
+        return simplexResults.isBounded;
+    }
+
+    /**
+     * Simple struct to hold the results of the Simplex algorithm.
+     */
+    private class SimplexResults {
+        private final List<Vector> solutionTrace;
+        private final Vector optimalSolution;
+        private final double optimalValue;
+        private final boolean isFeasible;
+        private final boolean isBounded;
+
+        public SimplexResults(final List<Vector> solutionTrace,
+                              final boolean isFeasible,
+                              final boolean isBounded) {
+            this.solutionTrace = solutionTrace;
+            this.optimalSolution = solutionTrace.get(solutionTrace.size() - 1);
+            this.optimalValue = optimalSolution.dotProductAsDouble(costVector);
+            this.isFeasible = isFeasible;
+            this.isBounded = isBounded;
+        }
     }
 
     public static Builder newBuilder() {
@@ -215,12 +313,16 @@ public final class Simplex {
         private final List<ConstantCoefficient> lessThanConstants;
         private final List<Vector> equalities;
         private final List<ConstantCoefficient> equalityConstants;
+        private final List<Vector> greaterThanInequalities;
+        private final List<ConstantCoefficient> greaterThanConstants;
 
         private Builder() {
             this.lessThanInequalities = new ArrayList<>();
             this.lessThanConstants = new ArrayList<>();
             this.equalities = new ArrayList<>();
             this.equalityConstants = new ArrayList<>();
+            this.greaterThanInequalities = new ArrayList<>();
+            this.greaterThanConstants = new ArrayList<>();
         }
 
         public Builder withCostVector(final Vector costVector) {
@@ -248,6 +350,16 @@ public final class Simplex {
             return this;
         }
 
+        public Builder addGreaterThanInequality(final Vector greaterThan,
+                                                final ConstantCoefficient greaterThanConstant) {
+            Preconditions.checkArgument(
+                    Coefficients.isNonNegative(greaterThanConstant),
+                    "Right Hand Side of greaterThan must be non-negative!");
+            this.greaterThanInequalities.add(greaterThan);
+            this.greaterThanConstants.add(greaterThanConstant);
+            return this;
+        }
+
         public Simplex build() {
             Preconditions.checkNotNull(costVector, "Must provide a cost vector");
             Preconditions.checkArgument(lessThanInequalities
@@ -262,7 +374,22 @@ public final class Simplex {
                             .allMatch(Predicate.isEqual(costVector.length())),
                     "One or more less than inequalities provided do not match the length of the cost vector"
             );
-            return new Simplex(costVector, lessThanInequalities, lessThanConstants, equalities, equalityConstants);
+            Preconditions.checkArgument(greaterThanInequalities
+                            .stream()
+                            .map(Vector::length)
+                            .allMatch(Predicate.isEqual(costVector.length())),
+                    "One or more greater than inequalities provided do not match the length of the cost vector"
+            );
+
+            return new Simplex(
+                    costVector,
+                    lessThanInequalities,
+                    lessThanConstants,
+                    equalities,
+                    equalityConstants,
+                    greaterThanInequalities,
+                    greaterThanConstants
+            );
         }
     }
 }
