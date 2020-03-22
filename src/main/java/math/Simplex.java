@@ -34,6 +34,7 @@ import java.util.function.Predicate;
  * we use to find the final solution.
  */
 public final class Simplex {
+    private final boolean maximize;
     private final Vector costVector;
     private final List<Vector> lessThanInequalities;
     private final List<ConstantCoefficient> lessThanConstants;
@@ -47,13 +48,15 @@ public final class Simplex {
     private final int[] basisVariables;
     private final SimplexResults simplexResults;
 
-    private Simplex(final Vector costVector,
+    private Simplex(final boolean maximize,
+                    final Vector costVector,
                     final List<Vector> lessThanInequalities,
                     final List<ConstantCoefficient> lessThanConstants,
                     final List<Vector> equalities,
                     final List<ConstantCoefficient> equalityConstants,
                     final List<Vector> greaterThanInequalities,
                     final List<ConstantCoefficient> greaterThanConstants) {
+        this.maximize = maximize;
         this.costVector = costVector;
         this.lessThanInequalities = lessThanInequalities;
         this.lessThanConstants = lessThanConstants;
@@ -181,10 +184,10 @@ public final class Simplex {
         if (isFeasible && isBounded) {
             optimalValue = solutionVector.dotProductAsDouble(costVector);
         } else {
-            optimalValue = isFeasible ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+            optimalValue = (maximize ? 1.0 : -1.0) * (isFeasible ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
         }
 
-        return new SimplexResults(simplexSolutions, isFeasible, isBounded);
+        return new SimplexResults(simplexSolutions, optimalValue, isFeasible, isBounded);
     }
 
     private static Vector createSolutionFromBasis(final Tableau tableau,
@@ -223,7 +226,8 @@ public final class Simplex {
     private Coefficient getVariableCost(final int variableIndex) {
         if (variableIndex < costVector.length()) {
             // Regular variables
-            return costVector.get(variableIndex);
+            final Coefficient cost = costVector.get(variableIndex);
+            return maximize ? cost : cost.negate();
         } else if (variableIndex < costVector.length() + numSlackVariables) {
             // Slack variables
             return Coefficients.ZERO;
@@ -293,11 +297,12 @@ public final class Simplex {
         private final boolean isBounded;
 
         public SimplexResults(final List<Vector> solutionTrace,
+                              final double optimalValue,
                               final boolean isFeasible,
                               final boolean isBounded) {
             this.solutionTrace = solutionTrace;
             this.optimalSolution = solutionTrace.get(solutionTrace.size() - 1);
-            this.optimalValue = optimalSolution.dotProductAsDouble(costVector);
+            this.optimalValue = optimalValue;
             this.isFeasible = isFeasible;
             this.isBounded = isBounded;
         }
@@ -309,6 +314,7 @@ public final class Simplex {
 
     public static class Builder {
         private Vector costVector;
+        private boolean maximize;
         private final List<Vector> lessThanInequalities;
         private final List<ConstantCoefficient> lessThanConstants;
         private final List<Vector> equalities;
@@ -317,12 +323,23 @@ public final class Simplex {
         private final List<ConstantCoefficient> greaterThanConstants;
 
         private Builder() {
+            this.maximize = true;
             this.lessThanInequalities = new ArrayList<>();
             this.lessThanConstants = new ArrayList<>();
             this.equalities = new ArrayList<>();
             this.equalityConstants = new ArrayList<>();
             this.greaterThanInequalities = new ArrayList<>();
             this.greaterThanConstants = new ArrayList<>();
+        }
+
+        public Builder maximizeCostFunction() {
+            this.maximize = true;
+            return this;
+        }
+
+        public Builder minimizeCostFunction() {
+            this.maximize = false;
+            return this;
         }
 
         public Builder withCostVector(final Vector costVector) {
@@ -332,31 +349,37 @@ public final class Simplex {
 
         public Builder addLessThanInequality(final Vector lessThanInequality,
                                              final ConstantCoefficient lessThanConstant) {
-            Preconditions.checkArgument(
-                    Coefficients.isNonNegative(lessThanConstant),
-                    "Right Hand Side of inequality must be non-negative!");
-            this.lessThanInequalities.add(lessThanInequality);
-            this.lessThanConstants.add(lessThanConstant);
+            if (Coefficients.isNegative(lessThanConstant)) {
+                this.greaterThanInequalities.add(Vector.negate(lessThanInequality));
+                this.greaterThanConstants.add(lessThanConstant.negate());
+            } else {
+                this.lessThanInequalities.add(lessThanInequality);
+                this.lessThanConstants.add(lessThanConstant);
+            }
             return this;
         }
 
         public Builder addEquality(final Vector equality,
                                    final ConstantCoefficient equalityConstant) {
-            Preconditions.checkArgument(
-                    Coefficients.isNonNegative(equalityConstant),
-                    "Right Hand Side of equality must be non-negative!");
-            this.equalities.add(equality);
-            this.equalityConstants.add(equalityConstant);
+            if (Coefficients.isNegative(equalityConstant)) {
+                this.equalities.add(Vector.negate(equality));
+                this.equalityConstants.add(equalityConstant.negate());
+            } else {
+                this.equalities.add(equality);
+                this.equalityConstants.add(equalityConstant);
+            }
             return this;
         }
 
-        public Builder addGreaterThanInequality(final Vector greaterThan,
+        public Builder addGreaterThanInequality(final Vector greaterThanInequality,
                                                 final ConstantCoefficient greaterThanConstant) {
-            Preconditions.checkArgument(
-                    Coefficients.isNonNegative(greaterThanConstant),
-                    "Right Hand Side of greaterThan must be non-negative!");
-            this.greaterThanInequalities.add(greaterThan);
-            this.greaterThanConstants.add(greaterThanConstant);
+            if (Coefficients.isNegative(greaterThanConstant)) {
+                this.lessThanInequalities.add(Vector.negate(greaterThanInequality));
+                this.lessThanConstants.add(greaterThanConstant.negate());
+            } else {
+                this.greaterThanInequalities.add(greaterThanInequality);
+                this.greaterThanConstants.add(greaterThanConstant);
+            }
             return this;
         }
 
@@ -382,6 +405,7 @@ public final class Simplex {
             );
 
             return new Simplex(
+                    maximize,
                     costVector,
                     lessThanInequalities,
                     lessThanConstants,

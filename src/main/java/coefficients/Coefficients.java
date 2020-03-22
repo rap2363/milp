@@ -38,7 +38,7 @@ public final class Coefficients {
         return new DoubleCoefficient(value);
     }
 
-    public static IntegerCoefficient from(final int value) {
+    public static IntegerCoefficient from(final long value) {
         if (value == -1) {
             return negativeOne();
         }
@@ -50,11 +50,11 @@ public final class Coefficients {
         return NEGATIVE_ONE;
     }
 
-    public static Coefficient from(final int numerator, final int denominator) {
+    public static ConstantCoefficient from(final long numerator, final long denominator) {
         return fromNumeratorAndDenominator(numerator, denominator);
     }
 
-    public static ConstantCoefficient fromNumeratorAndDenominator(final int numerator, final int denominator) {
+    public static ConstantCoefficient fromNumeratorAndDenominator(final long numerator, final long denominator) {
         if (numerator % denominator == 0) {
             return from(numerator / denominator);
         }
@@ -287,7 +287,7 @@ public final class Coefficients {
 
     private static int compareIntegerToInteger(final IntegerCoefficient firstCoefficient,
                                                final IntegerCoefficient secondCoefficient) {
-        return Integer.compare(firstCoefficient.getValue(), secondCoefficient.getValue());
+        return Long.compare(firstCoefficient.getValue(), secondCoefficient.getValue());
     }
 
     /******************************************************************************************************************
@@ -424,10 +424,10 @@ public final class Coefficients {
 
     private static Coefficient addRationalToRational(final RationalCoefficient firstCoefficient,
                                                      final RationalCoefficient secondCoefficient) {
-        final int a = firstCoefficient.getNumeratorValue();
-        final int b = firstCoefficient.getDenominatorValue();
-        final int c = secondCoefficient.getNumeratorValue();
-        final int d = secondCoefficient.getDenominatorValue();
+        final long a = firstCoefficient.getNumeratorValue();
+        final long b = firstCoefficient.getDenominatorValue();
+        final long c = secondCoefficient.getNumeratorValue();
+        final long d = secondCoefficient.getDenominatorValue();
 
         return Coefficients.fromNumeratorAndDenominator(
                 a * d + b * c,
@@ -588,10 +588,10 @@ public final class Coefficients {
 
     private static Coefficient scaleRationalByRational(final RationalCoefficient firstCoefficient,
                                                        final RationalCoefficient secondCoefficient) {
-        final int a = firstCoefficient.getNumeratorValue();
-        final int b = firstCoefficient.getDenominatorValue();
-        final int c = secondCoefficient.getNumeratorValue();
-        final int d = secondCoefficient.getDenominatorValue();
+        final long a = firstCoefficient.getNumeratorValue();
+        final long b = firstCoefficient.getDenominatorValue();
+        final long c = secondCoefficient.getNumeratorValue();
+        final long d = secondCoefficient.getDenominatorValue();
 
         return Coefficients.fromNumeratorAndDenominator(
                 a * c,

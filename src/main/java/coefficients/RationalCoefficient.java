@@ -15,22 +15,22 @@ public final class RationalCoefficient implements ConstantCoefficient {
     private final PrimeFactorization denominatorFactorization;
     private final boolean isNegative;
 
-    RationalCoefficient(final int numeratorValue, final int denominatorValue) {
+    RationalCoefficient(final long numeratorValue, final long denominatorValue) {
         this.isNegative = numeratorValue > 0 && denominatorValue < 0 || numeratorValue < 0 && denominatorValue > 0;
         final PrimeFactorization initialNumerator = new PrimeFactorization(Math.abs(numeratorValue));
         final PrimeFactorization initialDenominator = new PrimeFactorization(Math.abs(denominatorValue));
 
-        final Map<Integer, Integer> numeratorMap = initialNumerator.getPrimeFactorsMap();
-        final Map<Integer, Integer> denominatorMap = initialDenominator.getPrimeFactorsMap();
+        final Map<Long, Integer> numeratorMap = initialNumerator.getPrimeFactorsMap();
+        final Map<Long, Integer> denominatorMap = initialDenominator.getPrimeFactorsMap();
 
-        final Set<Integer> allPrimeFactors = new HashSet<>(numeratorMap.keySet());
+        final Set<Long> allPrimeFactors = new HashSet<>(numeratorMap.keySet());
         allPrimeFactors.addAll(denominatorMap.keySet());
 
-        final Map<Integer, Integer> reducedNumeratorMap = new HashMap<>();
-        final Map<Integer, Integer> reducedDenominatorMap = new HashMap<>();
+        final Map<Long, Integer> reducedNumeratorMap = new HashMap<>();
+        final Map<Long, Integer> reducedDenominatorMap = new HashMap<>();
 
         // For each pair of "intersecting" keys, divide out the values
-        for (final int primeFactor : allPrimeFactors) {
+        for (final long primeFactor : allPrimeFactors) {
             final Integer numeratorCount = numeratorMap.get(primeFactor);
             final Integer denominatorCount = denominatorMap.get(primeFactor);
 
@@ -59,11 +59,11 @@ public final class RationalCoefficient implements ConstantCoefficient {
         this.isNegative = isNegative;
     }
 
-    public int getNumeratorValue() {
+    public long getNumeratorValue() {
         return numeratorFactorization.getValue() * (isNegative ? -1 : 1);
     }
 
-    public int getDenominatorValue() {
+    public long getDenominatorValue() {
         return denominatorFactorization.getValue();
     }
 
