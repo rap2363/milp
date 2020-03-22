@@ -1,13 +1,13 @@
 package coefficients;
 
 public final class IntegerCoefficient implements ConstantCoefficient {
-    private final int value;
+    private final long value;
 
-    IntegerCoefficient(final int value) {
+    IntegerCoefficient(final long value) {
         this.value = value;
     }
 
-    int getValue() {
+    long getValue() {
         return value;
     }
 
@@ -49,6 +49,6 @@ public final class IntegerCoefficient implements ConstantCoefficient {
 
     @Override
     public String toString() {
-        return Integer.toString(value);
+        return Long.toString(value);
     }
 }

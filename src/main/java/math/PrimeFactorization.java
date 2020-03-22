@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public final class PrimeFactorization {
-    private final Map<Integer, Integer> primeFactorsMap;
-    private final int value;
+    private final Map<Long, Integer> primeFactorsMap;
+    private final long value;
 
-    public PrimeFactorization(final int value) {
+    public PrimeFactorization(final long value) {
         if (value < 0) {
             throw new IllegalArgumentException("Value can't be negative");
         } else if (value <= 1) {
@@ -20,19 +20,19 @@ public final class PrimeFactorization {
         this.value = value;
     }
 
-    public PrimeFactorization(final Map<Integer, Integer> primeFactorsMap) {
+    public PrimeFactorization(final Map<Long, Integer> primeFactorsMap) {
         this.primeFactorsMap = primeFactorsMap;
         this.value = getValueFrom(primeFactorsMap);
     }
 
-    public Map<Integer, Integer> getPrimeFactorsMap() {
+    public Map<Long, Integer> getPrimeFactorsMap() {
         return primeFactorsMap;
     }
 
-    private static int getValueFrom(final Map<Integer, Integer> primeFactorsMap) {
+    private static int getValueFrom(final Map<Long, Integer> primeFactorsMap) {
         int value = 1;
-        for (final Entry<Integer, Integer> entry : primeFactorsMap.entrySet()) {
-            final int primeFactor = entry.getKey();
+        for (final Entry<Long, Integer> entry : primeFactorsMap.entrySet()) {
+            final long primeFactor = entry.getKey();
             for (int i = 0; i < entry.getValue(); i++) {
                 value *= primeFactor;
             }
@@ -41,18 +41,18 @@ public final class PrimeFactorization {
         return value;
     }
 
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 
     @Override
     public String toString() {
-        return Integer.toString(value);
+        return Long.toString(value);
     }
 
-    static HashMap<Integer, Integer> getPrimeFactors(final int value) {
-        final HashMap<Integer, Integer> primeFactorsMap = new HashMap<>();
-        int n = value;
+    static HashMap<Long, Integer> getPrimeFactors(final long value) {
+        final HashMap<Long, Integer> primeFactorsMap = new HashMap<>();
+        long n = value;
         while (n % 2 == 0) {
             incrementMapValue(primeFactorsMap, 2);
             n /= 2;
@@ -72,7 +72,7 @@ public final class PrimeFactorization {
         return primeFactorsMap;
     }
 
-    static void incrementMapValue(final HashMap<Integer, Integer> primeFactorsMap, final int value) {
+    private static void incrementMapValue(final Map<Long, Integer> primeFactorsMap, final long value) {
         if (!primeFactorsMap.containsKey(value)) {
             primeFactorsMap.put(value, 1);
         } else {

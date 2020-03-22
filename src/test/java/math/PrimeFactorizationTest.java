@@ -1,63 +1,64 @@
 package math;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.util.Map;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class PrimeFactorizationTest {
     @Test
     public void testPrimeFactorizationOf0() {
-        final Map<Integer, Integer> primeFactorsMap = new PrimeFactorization(0).getPrimeFactorsMap();
+        final Map<Long, Integer> primeFactorsMap = new PrimeFactorization(0).getPrimeFactorsMap();
 
         assertEquals(1, primeFactorsMap.size());
 
-        assertEquals(new Integer(1), primeFactorsMap.get(0));
+        assertEquals(new Integer(1), primeFactorsMap.get(0L));
     }
 
     @Test
     public void testPrimeFactorizationOf1() {
-        final Map<Integer, Integer> primeFactorsMap = new PrimeFactorization(1).getPrimeFactorsMap();
+        final Map<Long, Integer> primeFactorsMap = new PrimeFactorization(1).getPrimeFactorsMap();
 
         assertEquals(1, primeFactorsMap.size());
 
-        assertEquals(new Integer(1), primeFactorsMap.get(1));
+        assertEquals(new Integer(1), primeFactorsMap.get(1L));
     }
 
     @Test
     public void testPrimeFactorizationOf36() {
-        final Map<Integer, Integer> primeFactorsMap = new PrimeFactorization(36).getPrimeFactorsMap();
+        final Map<Long, Integer> primeFactorsMap = new PrimeFactorization(36).getPrimeFactorsMap();
 
         assertEquals(2, primeFactorsMap.size());
 
-        assertEquals(new Integer(2), primeFactorsMap.get(2));
-        assertEquals(new Integer(2), primeFactorsMap.get(3));
+        assertEquals(new Integer(2), primeFactorsMap.get(2L));
+        assertEquals(new Integer(2), primeFactorsMap.get(3L));
     }
 
     @Test
     public void testPrimeFactorizationOf120() {
-        final Map<Integer, Integer> primeFactorsMap = new PrimeFactorization(120).getPrimeFactorsMap();
+        final Map<Long, Integer> primeFactorsMap = new PrimeFactorization(120).getPrimeFactorsMap();
 
         assertEquals(3, primeFactorsMap.size());
 
-        assertEquals(new Integer(3), primeFactorsMap.get(2));
-        assertEquals(new Integer(1), primeFactorsMap.get(3));
-        assertEquals(new Integer(1), primeFactorsMap.get(5));
+        assertEquals(new Integer(3), primeFactorsMap.get(2L));
+        assertEquals(new Integer(1), primeFactorsMap.get(3L));
+        assertEquals(new Integer(1), primeFactorsMap.get(5L));
     }
 
     @Test
     public void testPrimeFactorizationOf9699690() {
-        final Map<Integer, Integer> primeFactorsMap = new PrimeFactorization(9699690).getPrimeFactorsMap();
+        final Map<Long, Integer> primeFactorsMap = new PrimeFactorization(9699690).getPrimeFactorsMap();
 
         assertEquals(8, primeFactorsMap.size());
 
-        assertEquals(new Integer(1), primeFactorsMap.get(2));
-        assertEquals(new Integer(1), primeFactorsMap.get(3));
-        assertEquals(new Integer(1), primeFactorsMap.get(5));
-        assertEquals(new Integer(1), primeFactorsMap.get(7));
-        assertEquals(new Integer(1), primeFactorsMap.get(11));
-        assertEquals(new Integer(1), primeFactorsMap.get(13));
-        assertEquals(new Integer(1), primeFactorsMap.get(17));
-        assertEquals(new Integer(1), primeFactorsMap.get(19));
+        assertEquals(new Integer(1), primeFactorsMap.get(2L));
+        assertEquals(new Integer(1), primeFactorsMap.get(3L));
+        assertEquals(new Integer(1), primeFactorsMap.get(5L));
+        assertEquals(new Integer(1), primeFactorsMap.get(7L));
+        assertEquals(new Integer(1), primeFactorsMap.get(11L));
+        assertEquals(new Integer(1), primeFactorsMap.get(13L));
+        assertEquals(new Integer(1), primeFactorsMap.get(17L));
+        assertEquals(new Integer(1), primeFactorsMap.get(19L));
     }
 }

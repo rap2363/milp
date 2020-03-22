@@ -37,12 +37,21 @@ public final class Vector {
     }
 
     public Vector scale(final Coefficient value) {
-        final Coefficient[] newCoefficients = new Coefficient[length()];
-        for (int i = 0; i < length(); i++) {
-            newCoefficients[i] = Coefficients.scaleBy(coefficients[i], value);
+        return scale(this, value);
+    }
+
+    public static Vector scale(final Vector vector, final Coefficient value) {
+        final int vectorLength = vector.length();
+        final Coefficient[] newCoefficients = new Coefficient[vectorLength];
+        for (int i = 0; i < vectorLength; i++) {
+            newCoefficients[i] = Coefficients.scaleBy(vector.coefficients[i], value);
         }
 
         return new Vector(newCoefficients);
+    }
+
+    public static Vector negate(final Vector vector) {
+        return scale(vector, Coefficients.NEGATIVE_ONE);
     }
 
     public Coefficient dotProduct(final Vector other) {
