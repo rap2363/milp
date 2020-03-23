@@ -150,6 +150,13 @@ public final class Vector {
             return this;
         }
 
+        public Builder addAllDoubleCoefficients(final double... coefficients) {
+            for (final double coefficient : coefficients) {
+                addCoefficient(coefficient);
+            }
+            return this;
+        }
+
         public Builder addFromVector(final Vector vector) {
             for (final Coefficient coefficient : vector.getValues()) {
                 addCoefficient(coefficient);
