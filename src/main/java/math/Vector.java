@@ -15,6 +15,14 @@ public final class Vector {
         this.coefficients = coefficients;
     }
 
+    public Builder toBuilder() {
+        return toBuilder(this);
+    }
+
+    public static Builder toBuilder(final Vector vector) {
+        return new Builder().addAllCoefficients(vector.getValues());
+    }
+
     public int length() {
         return coefficients.length;
     }
@@ -153,9 +161,9 @@ public final class Vector {
             return this;
         }
 
-        public Builder addAllIntegerCoefficients(final long... coefficients) {
-            for (final long coefficient : coefficients) {
-                addCoefficient(Coefficients.from(coefficient));
+        public Builder addAllCoefficients(final Iterable<Coefficient> coefficients) {
+            for (final Coefficient coefficient : coefficients) {
+                addCoefficient(coefficient);
             }
             return this;
         }
