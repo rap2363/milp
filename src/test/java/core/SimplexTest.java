@@ -1,6 +1,7 @@
-package math;
+package core;
 
 import coefficients.Coefficients;
+import math.Vector;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

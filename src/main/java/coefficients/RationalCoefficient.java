@@ -59,6 +59,52 @@ public final class RationalCoefficient implements ConstantCoefficient {
         this.isNegative = isNegative;
     }
 
+    public static RationalCoefficient multiply(final RationalCoefficient firstRationalCoefficient,
+                                               final RationalCoefficient secondRationalCoefficient) {
+        final boolean newCoefficientIsNegative
+                = firstRationalCoefficient.isNegative && !secondRationalCoefficient.isNegative
+                || !firstRationalCoefficient.isNegative && secondRationalCoefficient.isNegative;
+
+        final PrimeFactorization newNumeratorFactorization = PrimeFactorization.concatenate(
+                firstRationalCoefficient.numeratorFactorization,
+                secondRationalCoefficient.numeratorFactorization
+        );
+
+        final PrimeFactorization newDenominatorFactorization = PrimeFactorization.concatenate(
+                firstRationalCoefficient.denominatorFactorization,
+                secondRationalCoefficient.denominatorFactorization
+        );
+
+        final Set<Long> allPrimeFactors = new HashSet<>(newNumeratorFactorization.getPrimeFactorsMap().keySet());
+        allPrimeFactors.addAll(newDenominatorFactorization.getPrimeFactorsMap().keySet());
+
+        final Map<Long, Integer> reducedNumeratorMap = new HashMap<>();
+        final Map<Long, Integer> reducedDenominatorMap = new HashMap<>();
+
+        // For each pair of "intersecting" keys, divide out the values
+        for (final long primeFactor : allPrimeFactors) {
+            final Integer numeratorCount = newNumeratorFactorization.getPrimeFactorsMap().get(primeFactor);
+            final Integer denominatorCount = newDenominatorFactorization.getPrimeFactorsMap().get(primeFactor);
+
+            if (numeratorCount != null && denominatorCount == null) {
+                reducedNumeratorMap.put(primeFactor, numeratorCount);
+            } else if (numeratorCount == null && denominatorCount != null) {
+                reducedDenominatorMap.put(primeFactor, denominatorCount);
+            } else {
+                // The numerator and denominator counts will *always* be non-null by this point.
+                final int minCount = Math.min(numeratorCount, denominatorCount);
+
+                reducedNumeratorMap.put(primeFactor, numeratorCount - minCount);
+                reducedDenominatorMap.put(primeFactor, denominatorCount - minCount);
+            }
+        }
+
+        return new RationalCoefficient(
+                new PrimeFactorization(reducedNumeratorMap),
+                new PrimeFactorization(reducedDenominatorMap),
+                newCoefficientIsNegative);
+    }
+
     public long getNumeratorValue() {
         return numeratorFactorization.getValue() * (isNegative ? -1 : 1);
     }

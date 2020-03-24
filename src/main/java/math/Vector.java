@@ -62,6 +62,9 @@ public final class Vector {
         Preconditions.checkArgument(first.length() == second.length());
         Coefficient value = Coefficients.ZERO;
         for (int i = 0; i < first.length(); i++) {
+            if (Coefficients.isZero(first.get(i)) || Coefficients.isZero(second.get(i))) {
+                continue;
+            }
             value = Coefficients.add(value, Coefficients.scaleBy(first.get(i), second.get(i)));
         }
         return value;
@@ -145,6 +148,20 @@ public final class Vector {
 
         public Builder addAllCoefficients(final Coefficient... coefficients) {
             for (final Coefficient coefficient : coefficients) {
+                addCoefficient(coefficient);
+            }
+            return this;
+        }
+
+        public Builder addAllIntegerCoefficients(final long... coefficients) {
+            for (final long coefficient : coefficients) {
+                addCoefficient(Coefficients.from(coefficient));
+            }
+            return this;
+        }
+
+        public Builder addAllDoubleCoefficients(final double... coefficients) {
+            for (final double coefficient : coefficients) {
                 addCoefficient(coefficient);
             }
             return this;

@@ -41,6 +41,20 @@ public final class PrimeFactorization {
         return value;
     }
 
+    /**
+     * Concatenate two prime factorization maps (which multiplies two prime factorizations)
+     */
+    public static PrimeFactorization concatenate(final PrimeFactorization firstPrimeFactorization,
+                                                 final PrimeFactorization secondPrimeFactorization) {
+        final Map<Long, Integer> firstMap = firstPrimeFactorization.getPrimeFactorsMap();
+        final Map<Long, Integer> secondMap = secondPrimeFactorization.getPrimeFactorsMap();
+        final Map<Long, Integer> newPrimeFactorsMap = new HashMap<>(firstMap);
+
+        secondMap.forEach((k, v) -> newPrimeFactorsMap.merge(k, v, Integer::sum));
+
+        return new PrimeFactorization(newPrimeFactorsMap);
+    }
+
     public long getValue() {
         return value;
     }

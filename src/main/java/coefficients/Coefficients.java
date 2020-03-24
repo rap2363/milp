@@ -41,6 +41,8 @@ public final class Coefficients {
     public static IntegerCoefficient from(final long value) {
         if (value == -1) {
             return negativeOne();
+        } else if (value == 0) {
+            return Coefficients.ZERO;
         }
 
         return new IntegerCoefficient(value);
@@ -277,6 +279,11 @@ public final class Coefficients {
 
     private static int compareDoubleToDouble(final DoubleCoefficient firstCoefficient,
                                              final DoubleCoefficient secondCoefficient) {
+        // Because of floating point errors when comparing doubles after accumulating roundoff, we use a small threshold
+        // to excuse values within a very close distance to one another
+        if (Math.abs(firstCoefficient.getValue() - secondCoefficient.getValue()) < 1e-15) {
+            return 0;
+        }
         return Double.compare(firstCoefficient.getValue(), secondCoefficient.getValue());
     }
 
@@ -588,15 +595,7 @@ public final class Coefficients {
 
     private static Coefficient scaleRationalByRational(final RationalCoefficient firstCoefficient,
                                                        final RationalCoefficient secondCoefficient) {
-        final long a = firstCoefficient.getNumeratorValue();
-        final long b = firstCoefficient.getDenominatorValue();
-        final long c = secondCoefficient.getNumeratorValue();
-        final long d = secondCoefficient.getDenominatorValue();
-
-        return Coefficients.fromNumeratorAndDenominator(
-                a * c,
-                b * d
-        );
+        return RationalCoefficient.multiply(firstCoefficient, secondCoefficient);
     }
 
     private static Coefficient scaleRationalByDouble(final RationalCoefficient firstCoefficient,

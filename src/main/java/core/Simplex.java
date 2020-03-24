@@ -1,10 +1,11 @@
-package math;
+package core;
 
 import coefficients.Coefficient;
 import coefficients.Coefficients;
 import coefficients.ConstantCoefficient;
 import coefficients.LinearMCoefficient;
 import lang.Preconditions;
+import math.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,12 +125,12 @@ public final class Simplex {
         for (int i = 0; i < greaterThanInequalities.size(); i++) {
             final Vector.Builder greaterThanInequalityVectorBuilder = Vector.newBuilder();
             for (int j = 0; j < numSlackVariables + numArtificialVariables; j++) {
-                final int lessThanOffset = i + lessThanInequalities.size();
-                final int artficialOffset = i + numSlackVariables;
+                final int lessThanOffset = lessThanInequalities.size();
+                final int artificialOffset = numSlackVariables;
                 // Subtract slack variables
                 if (j == i + lessThanOffset) {
                     greaterThanInequalityVectorBuilder.addCoefficient(Coefficients.NEGATIVE_ONE);
-                } else if (j == i + artficialOffset) {
+                } else if (j == i + artificialOffset) {
                     greaterThanInequalityVectorBuilder.addCoefficient(Coefficients.ONE);
                 } else {
                     greaterThanInequalityVectorBuilder.addCoefficient(Coefficients.ZERO);
@@ -241,24 +242,29 @@ public final class Simplex {
         return getVariableCost(basisVariables[row]);
     }
 
+    /**
+     * Checks whether costs are feasible within some epsilon bound (to account for roundoff errors in dot products).
+     */
     private boolean isFeasibleSolution(final Vector solution) {
+        final double EPSILON = 1e-12;
+
         for (int i = 0; i < lessThanInequalities.size(); i++) {
-            final Coefficient cost = Vector.dotProduct(lessThanInequalities.get(i), solution);
-            if (Coefficients.greaterThan(cost, lessThanConstants.get(i))) {
+            final double cost = Vector.dotProductAsDouble(lessThanInequalities.get(i), solution);
+            if (cost - Coefficients.asDouble(lessThanConstants.get(i)) > EPSILON) {
                 return false;
             }
         }
 
         for (int i = 0; i < equalities.size(); i++) {
-            final Coefficient cost = Vector.dotProduct(equalities.get(i), solution);
-            if (!Coefficients.equalTo(cost, equalityConstants.get(i))) {
+            final double cost = Vector.dotProductAsDouble(equalities.get(i), solution);
+            if (Math.abs(cost - Coefficients.asDouble(equalityConstants.get(i))) > EPSILON) {
                 return false;
             }
         }
 
         for (int i = 0; i < greaterThanInequalities.size(); i++) {
-            final Coefficient cost = Vector.dotProduct(greaterThanInequalities.get(i), solution);
-            if (Coefficients.lessThan(cost, greaterThanConstants.get(i))) {
+            final double cost = Vector.dotProductAsDouble(greaterThanInequalities.get(i), solution);
+            if (Coefficients.asDouble(greaterThanConstants.get(i)) - cost > EPSILON) {
                 return false;
             }
         }
