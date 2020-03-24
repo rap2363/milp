@@ -10,10 +10,6 @@ public final class Tableau {
     private final Vector[] vectors;
     private final int numVariables;
 
-    public Tableau(final Vector... vectors) {
-        this(vectors[0].length() - 1, vectors);
-    }
-
     public Tableau(final int numVariables,
                    final Vector... vectors) {
         this.vectors = vectors;

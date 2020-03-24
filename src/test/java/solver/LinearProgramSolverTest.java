@@ -2,8 +2,10 @@ package solver;
 
 import coefficients.Coefficients;
 import math.Vector;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class LinearProgramSolverTest {
@@ -92,8 +94,7 @@ public class LinearProgramSolverTest {
                 // protein
                 .addGreaterThanInequality(
                         Coefficients.from(70),
-                        1411, 897, 422, 17, 448, 661, 0, 333, 249, 705, 138, 125, 166, 336, 106, 138, 87, 99, 1055, 1691
-                )
+                        1411, 897, 422, 17, 448, 661, 0, 333, 249, 705, 138, 125, 166, 336, 106, 138, 87, 99, 1055, 1691)
                 // calcium
                 .addGreaterThanInequality(
                         Coefficients.from(0.8),
@@ -132,5 +133,186 @@ public class LinearProgramSolverTest {
                 .build();
 
         assertTrue(solver.getOptimalSolutionIfFeasible().isPresent());
+        assertEquals(0.1087, solver.getOptimalValue(), 1e-4);
+    }
+
+    @Test
+    @Ignore
+    public void testLPSolveForStiglersNutritionModelWithRationalCoefficients() {
+        /*
+         * This is a huge instance of the diet problem with 9 equations and 20 variables with only rational
+         * representations of the numbers. This does not complete in any reasonable amount of time currently, and is
+         * purely to see if we can create efficient rational representations that may someday allow for this sort of
+         * instance to be computed without having to resort to doubles.
+         */
+
+        final LinearProgramSolver solver = LinearProgramSolver.newBuilder()
+                .minimizingCost()
+                // Costs are normalized across each food (e.g. the units are in /$).
+                .withCostVector(Vector.newBuilder()
+                        .addAllCoefficients(
+                                // 20 foods
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE,
+                                Coefficients.ONE)
+                        .build())
+                // Add the nutritional requirements first
+                // calorie
+                .addGreaterThanInequality(
+                        Coefficients.from(3),
+                        Coefficients.from(447, 10),
+                        Coefficients.from(36),
+                        Coefficients.from(84, 10),
+                        Coefficients.from(206, 10),
+                        Coefficients.from(74, 10),
+                        Coefficients.from(157, 10),
+                        Coefficients.from(417, 10),
+                        Coefficients.from(22, 10),
+                        Coefficients.from(44, 10),
+                        Coefficients.from(58, 10),
+                        Coefficients.from(24, 10),
+                        Coefficients.from(26, 10),
+                        Coefficients.from(58, 10),
+                        Coefficients.from(143, 10),
+                        Coefficients.from(11, 10),
+                        Coefficients.from(96, 10),
+                        Coefficients.from(85, 10),
+                        Coefficients.from(128, 10),
+                        Coefficients.from(174, 10),
+                        Coefficients.from(269, 10))
+                // protein
+                .addGreaterThanInequality(
+                        Coefficients.from(70),
+                        1411L, 897, 422, 17, 448, 661, 0, 333, 249, 705, 138, 125, 166, 336, 106, 138, 87, 99, 1055, 1691
+                )
+                // calcium
+                .addGreaterThanInequality(
+                        Coefficients.from(4, 5),
+                        Coefficients.from(2),
+                        Coefficients.from(17, 10),
+                        Coefficients.from(151, 10),
+                        Coefficients.from(3, 5),
+                        Coefficients.from(164, 10),
+                        Coefficients.from(1),
+                        Coefficients.from(0),
+                        Coefficients.from(1, 5),
+                        Coefficients.from(3, 10),
+                        Coefficients.from(68, 10),
+                        Coefficients.from(37, 10),
+                        Coefficients.from(4),
+                        Coefficients.from(38, 10),
+                        Coefficients.from(18, 10),
+                        Coefficients.from(0),
+                        Coefficients.from(27, 10),
+                        Coefficients.from(17, 10),
+                        Coefficients.from(25, 10),
+                        Coefficients.from(37, 10),
+                        Coefficients.from(114, 10))
+                // iron
+                .addGreaterThanInequality(
+                        Coefficients.from(12),
+                        365, 99, 9, 6, 19, 48, 0, 139, 37, 45, 80, 36, 59, 118, 138, 54, 173, 154, 459, 792
+                )
+                // vitamin-a
+                .addGreaterThanInequality(
+                        Coefficients.from(5),
+                        Coefficients.ZERO,
+                        Coefficients.from(309, 10),
+                        Coefficients.from(26),
+                        Coefficients.from(558, 10),
+                        Coefficients.from(281, 10),
+                        Coefficients.from(0),
+                        Coefficients.from(1, 5),
+                        Coefficients.from(1692, 10),
+                        Coefficients.from(0),
+                        Coefficients.from(7, 2),
+                        Coefficients.from(69),
+                        Coefficients.from(72, 10),
+                        Coefficients.from(166, 10),
+                        Coefficients.from(67, 10),
+                        Coefficients.from(9184, 10),
+                        Coefficients.from(2907, 10),
+                        Coefficients.from(868, 10),
+                        Coefficients.from(857, 10),
+                        Coefficients.from(51, 10),
+                        Coefficients.from(0)
+                )
+                // vitamin-b1
+                .addGreaterThanInequality(
+                        Coefficients.from(9, 5),
+                        Coefficients.from(554, 10),
+                        Coefficients.from(174, 10),
+                        Coefficients.from(3),
+                        Coefficients.from(1, 5),
+                        Coefficients.from(4, 5),
+                        Coefficients.from(96, 10),
+                        Coefficients.from(0),
+                        Coefficients.from(64, 10),
+                        Coefficients.from(182, 10),
+                        Coefficients.from(1),
+                        Coefficients.from(43, 10),
+                        Coefficients.from(9),
+                        Coefficients.from(47, 10),
+                        Coefficients.from(294, 10),
+                        Coefficients.from(57, 10),
+                        Coefficients.from(84, 10),
+                        Coefficients.from(12, 10),
+                        Coefficients.from(39, 10),
+                        Coefficients.from(269, 10),
+                        Coefficients.from(38, 10))
+                // vitamin-b2
+                .addGreaterThanInequality(
+                        Coefficients.from(27, 10),
+                        Coefficients.from(333, 10),
+                        Coefficients.from(79, 10),
+                        Coefficients.from(235, 10),
+                        Coefficients.from(0),
+                        Coefficients.from(103, 10),
+                        Coefficients.from(81, 10),
+                        Coefficients.from(1, 2),
+                        Coefficients.from(508, 10),
+                        Coefficients.from(36, 10),
+                        Coefficients.from(49, 10),
+                        Coefficients.from(58, 10),
+                        Coefficients.from(45, 10),
+                        Coefficients.from(59, 10),
+                        Coefficients.from(71, 10),
+                        Coefficients.from(138, 10),
+                        Coefficients.from(54, 10),
+                        Coefficients.from(43, 10),
+                        Coefficients.from(43, 10),
+                        Coefficients.from(382, 10),
+                        Coefficients.from(246, 10))
+                // niacin
+                .addGreaterThanInequality(
+                        Coefficients.from(18),
+                        441, 106, 11, 0, 4, 471, 5, 316, 79, 209, 37, 26, 21, 198, 33, 83, 55, 65, 93, 217
+                )
+                // vitamin-c
+                .addGreaterThanInequality(
+                        Coefficients.from(75),
+                        0, 0, 60, 0, 0, 0, 0, 525, 0, 0, 862, 5369, 1184, 2522, 2755, 1912, 57, 257, 0, 0
+                )
+                .build();
+
+        assertTrue(solver.getOptimalSolutionIfFeasible().isPresent());
+        assertEquals(0.1087, solver.getOptimalValue(), 1e-4);
     }
 }

@@ -91,6 +91,15 @@ public class LinearProgramSolver implements Solver {
             return this;
         }
 
+        public Builder addEquality(final ConstantCoefficient equalityConstant,
+                                   final double... equalityVariables) {
+            simplexBuilder.addEquality(
+                    Vector.newBuilder().addAllDoubleCoefficients(equalityVariables).build(),
+                    equalityConstant
+            );
+            return this;
+        }
+
         public Builder withEqualities(final List<Vector> equalities,
                                       final List<ConstantCoefficient> equalityConstants) {
             Preconditions.checkArgument(equalities.size() == equalityConstants.size());
@@ -105,6 +114,15 @@ public class LinearProgramSolver implements Solver {
                                                 final double... greaterThanInequalityVariables) {
             simplexBuilder.addGreaterThanInequality(
                     Vector.newBuilder().addAllDoubleCoefficients(greaterThanInequalityVariables).build(),
+                    greaterThanConstant
+            );
+            return this;
+        }
+
+        public Builder addGreaterThanInequality(final ConstantCoefficient greaterThanConstant,
+                                                final ConstantCoefficient... greaterThanInequalityVariables) {
+            simplexBuilder.addGreaterThanInequality(
+                    Vector.newBuilder().addAllCoefficients(greaterThanInequalityVariables).build(),
                     greaterThanConstant
             );
             return this;
